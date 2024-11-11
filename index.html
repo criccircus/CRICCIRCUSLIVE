@@ -47,6 +47,7 @@
             padding: 5px;
             display: flex;
             gap: 10px;
+            flex-direction: row; /* Ensure horizontal layout */
         }
         .plyr__quality-options button {
             background: transparent;
@@ -58,9 +59,6 @@
         }
         .plyr__quality-options button:hover {
             background-color: #444;
-        }
-        .plyr__control--quality:hover .plyr__quality-options {
-            display: flex;
         }
     </style>
     <!-- Include Plyr CSS -->
@@ -116,6 +114,7 @@
                         const levelIndex = hls.levels.findIndex(level => level.height === quality);
                         hls.currentLevel = levelIndex;
                         qualityButton.innerHTML = `Quality: ${quality}p`; // Update the button label
+                        qualityOptions.style.display = 'none'; // Hide the options after selection
                     };
                     qualityOptions.appendChild(button);
                 });
@@ -126,6 +125,12 @@
 
                 // Set default quality to highest
                 qualityButton.innerHTML = `Quality: ${availableQualities[availableQualities.length - 1]}p`;
+
+                // Toggle quality options on button click
+                qualityButton.addEventListener('click', () => {
+                    const isOptionsVisible = qualityOptions.style.display === 'flex';
+                    qualityOptions.style.display = isOptionsVisible ? 'none' : 'flex';
+                });
             });
 
             // Log the quality change for debugging purposes
