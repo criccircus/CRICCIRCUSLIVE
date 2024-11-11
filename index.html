@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Viewer</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f4f4f4;
+        }
+        #videoPlayer {
+            width: 80%;
+            height: 60vh;
+        }
+    </style>
+</head>
+<body>
+    <video id="videoPlayer" controls></video>
+    
+    <script>
+        // Get the video URL from the query parameter
+        const urlParams = new URLSearchParams(window.location.search);
+        const videoUrl = urlParams.get('videoUrl');
+        
+        // Set the video source if URL is provided
+        if (videoUrl) {
+            document.getElementById('videoPlayer').src = videoUrl;
+        } else {
+            alert('No video URL provided.');
+        }
+    </script>
+</body>
+</html>
