@@ -3,35 +3,71 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Video Viewer</title>
+    <title>Cric Circus Live</title>
     <style>
         body {
             display: flex;
-            justify-content: center;
+            flex-direction: column;
             align-items: center;
-            height: 100vh;
+            justify-content: center;
+            font-family: Arial, sans-serif;
+            background-color: #282c34;
+            color: white;
             margin: 0;
-            background-color: #f4f4f4;
+            padding: 0;
+            height: 100vh;
         }
-        #videoPlayer {
+        h1 {
+            margin: 10px 0;
+        }
+        .video-container {
             width: 80%;
-            height: 60vh;
+            max-width: 800px;
+            height: auto;
+        }
+        video {
+            width: 100%;
+            height: auto;
         }
     </style>
 </head>
 <body>
-    <video id="videoPlayer" controls></video>
+    <h1>Welcome to Cric Circus Live</h1>
+    <div class="video-container">
+        <video id="videoPlayer" controls autoplay></video>
+    </div>
+
+    <!-- Include hls.js -->
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     
     <script>
-        // Get the video URL from the query parameter
+        // Get the video URL from the query string
         const urlParams = new URLSearchParams(window.location.search);
         const videoUrl = urlParams.get('videoUrl');
         
-        // Set the video source if URL is provided
-        if (videoUrl) {
-            document.getElementById('videoPlayer').src = videoUrl;
+        // Check if hls.js is supported
+        if (Hls.isSupported()) {
+            const video = document.getElementById('videoPlayer');
+            const hls = new Hls();
+            
+            // Load the video if a URL is provided
+            if (videoUrl) {
+                hls.loadSource(videoUrl);
+                hls.attachMedia(video);
+            } else {
+                alert('No video URL provided.');
+            }
+
+            hls.on(Hls.Events.MANIFEST_PARSED, function () {
+                console.log('Manifest loaded, start playing');
+            });
+        }
+        // Fallback for browsers that do not support hls.js (e.g., Safari)
+        else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+            const video = document.getElementById('videoPlayer');
+            video.src = videoUrl;
         } else {
-            alert('No video URL provided.');
+            alert('Your browser does not support HLS streams.');
         }
     </script>
 </body>
