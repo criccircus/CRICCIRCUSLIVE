@@ -54,6 +54,8 @@
 
         if (Hls.isSupported() && videoUrl) {
             const hls = new Hls();
+
+            // Load the source URL
             hls.loadSource(videoUrl);
             hls.attachMedia(video);
 
@@ -61,23 +63,20 @@
                 // Get available quality levels (resolutions)
                 const availableQualities = hls.levels.map(level => level.height).filter((v, i, a) => a.indexOf(v) === i); // Unique quality heights
 
-                // Set up the Plyr quality menu with these levels
-                player.options.quality = {
-                    default: availableQualities[availableQualities.length - 1], // Default to highest quality
-                    options: availableQualities, // Add all available quality levels
-                    forced: true, // Disable Plyr auto quality management
-                    onChange: (newQuality) => {
-                        // Find the HLS level that matches the selected quality and set it
-                        const levelIndex = hls.levels.findIndex(level => level.height === newQuality);
-                        hls.currentLevel = levelIndex;
-                    }
-                };
+                // Create a custom quality menu with Plyr options
+                const qualityMenu = availableQualities.map(quality => {
+                    return {
+                        label: quality + 'p',
+                        value: quality
+                    };
+                });
 
-                // Update the quality setting menu
+                // Plyr quality options setup
                 player.on('ready', () => {
-                    player.quality = {
-                        options: availableQualities,
-                        forced: true,
+                    player.options.quality = {
+                        default: availableQualities[availableQualities.length - 1], // Default to highest quality
+                        options: availableQualities, // Available quality options
+                        forced: true, // Disable Plyr auto quality management
                         onChange: (newQuality) => {
                             const qualityIndex = hls.levels.findIndex(level => level.height === newQuality);
                             hls.currentLevel = qualityIndex;
@@ -91,6 +90,7 @@
                 console.log('Switched to quality:', hls.levels[data.level].height + 'p');
             });
         } else if (video.canPlayType('application/vnd.apple.mpegurl') && videoUrl) {
+            // For native HLS support (e.g., Safari)
             video.src = videoUrl;
             player.updateSettings();
         } else {
