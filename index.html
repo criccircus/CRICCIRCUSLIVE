@@ -29,24 +29,29 @@
             width: 100%;
             height: auto;
         }
+        /* Ensure the quality button is placed within the control bar */
         .plyr__control--quality {
-            position: relative;
             padding: 10px;
             cursor: pointer;
             display: flex;
             align-items: center;
+            position: relative;
+            background-color: #444;
+            border: none;
+            color: white;
+            border-radius: 4px;
         }
         .plyr__quality-options {
             display: none;
             position: absolute;
-            top: 30px;
+            top: 40px;  /* Move the options below the button */
             left: 0;
             background-color: rgba(0, 0, 0, 0.8);
             border: 1px solid #444;
             border-radius: 4px;
             padding: 5px;
-            display: flex;
             flex-direction: column; /* Vertical layout */
+            width: 120px;
         }
         .plyr__quality-options button {
             background: transparent;
@@ -57,7 +62,7 @@
             cursor: pointer;
         }
         .plyr__quality-options button:hover {
-            background-color: #444;
+            background-color: #555;
         }
     </style>
     <!-- Include Plyr CSS -->
