@@ -46,8 +46,7 @@
             border-radius: 4px;
             padding: 5px;
             display: flex;
-            gap: 10px;
-            flex-direction: row; /* Ensure horizontal layout */
+            flex-direction: column; /* Vertical layout */
         }
         .plyr__quality-options button {
             background: transparent;
@@ -102,11 +101,11 @@
                 qualityButton.classList.add('plyr__control', 'plyr__control--quality');
                 qualityButton.innerHTML = 'Quality';
 
-                // Create quality options for the horizontal layout
+                // Create quality options for the vertical layout
                 qualityOptions = document.createElement('div');
                 qualityOptions.classList.add('plyr__quality-options');
 
-                // Populate quality options horizontally
+                // Populate quality options vertically
                 availableQualities.forEach(quality => {
                     const button = document.createElement('button');
                     button.textContent = quality + 'p';
