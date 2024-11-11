@@ -30,42 +30,39 @@
             height: auto;
         }
     </style>
+    <!-- Include Plyr CSS -->
+    <link rel="stylesheet" href="https://cdn.plyr.io/3.6.8/plyr.css" />
 </head>
 <body>
     <h1>Welcome to Cric Circus Live</h1>
     <div class="video-container">
-        <video id="videoPlayer" controls autoplay></video>
+        <!-- Plyr video player element -->
+        <video id="videoPlayer" controls autoplay playsinline></video>
     </div>
 
-    <!-- Include hls.js -->
+    <!-- Include Hls.js and Plyr JavaScript libraries -->
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
-    
+    <script src="https://cdn.plyr.io/3.6.8/plyr.polyfilled.js"></script>
+
     <script>
         // Get the video URL from the query string
         const urlParams = new URLSearchParams(window.location.search);
         const videoUrl = urlParams.get('videoUrl');
         
-        // Check if hls.js is supported
-        if (Hls.isSupported()) {
-            const video = document.getElementById('videoPlayer');
-            const hls = new Hls();
-            
-            // Load the video if a URL is provided
-            if (videoUrl) {
-                hls.loadSource(videoUrl);
-                hls.attachMedia(video);
-            } else {
-                alert('No video URL provided.');
-            }
+        // Initialize Plyr player
+        const video = document.getElementById('videoPlayer');
 
-            hls.on(Hls.Events.MANIFEST_PARSED, function () {
-                console.log('Manifest loaded, start playing');
+        if (Hls.isSupported() && videoUrl) {
+            const hls = new Hls();
+            hls.loadSource(videoUrl);
+            hls.attachMedia(video);
+            hls.on(Hls.Events.MANIFEST_PARSED, () => {
+                new Plyr(video);
             });
-        }
-        // Fallback for browsers that do not support hls.js (e.g., Safari)
-        else if (video.canPlayType('application/vnd.apple.mpegurl')) {
-            const video = document.getElementById('videoPlayer');
+        } else if (video.canPlayType('application/vnd.apple.mpegurl') && videoUrl) {
+            // For Safari and other browsers that support native HLS
             video.src = videoUrl;
+            new Plyr(video);
         } else {
             alert('Your browser does not support HLS streams.');
         }
