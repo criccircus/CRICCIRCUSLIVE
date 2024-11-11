@@ -29,6 +29,33 @@
             width: 100%;
             height: auto;
         }
+        .plyr__control--quality {
+            position: relative;
+            padding: 10px;
+            cursor: pointer;
+        }
+        .plyr__quality-menu {
+            position: absolute;
+            top: 30px;
+            left: 0;
+            background-color: rgba(0, 0, 0, 0.8);
+            border: 1px solid #444;
+            border-radius: 4px;
+            padding: 5px;
+            display: none;
+            z-index: 10;
+        }
+        .plyr__quality-menu button {
+            background: transparent;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+        .plyr__quality-menu button:hover {
+            background-color: #444;
+        }
     </style>
     <!-- Include Plyr CSS -->
     <link rel="stylesheet" href="https://cdn.plyr.io/3.6.8/plyr.css" />
@@ -55,37 +82,53 @@
         if (Hls.isSupported() && videoUrl) {
             const hls = new Hls();
 
-            // Load the source URL
+            // Load the HLS stream
             hls.loadSource(videoUrl);
             hls.attachMedia(video);
 
+            // Create a quality selector menu dynamically
+            let qualityMenu = null;
+
             hls.on(Hls.Events.MANIFEST_PARSED, function () {
-                // Get available quality levels (resolutions)
                 const availableQualities = hls.levels.map(level => level.height).filter((v, i, a) => a.indexOf(v) === i); // Unique quality heights
 
-                // Create a custom quality menu with Plyr options
-                const qualityMenu = availableQualities.map(quality => {
-                    return {
-                        label: quality + 'p',
-                        value: quality
+                // Create the quality button in the Plyr control bar
+                const controlBar = document.querySelector('.plyr__controls');
+                const qualityButton = document.createElement('button');
+                qualityButton.classList.add('plyr__control', 'plyr__control--quality');
+                qualityButton.innerHTML = 'Quality';
+
+                // Create quality dropdown menu
+                qualityMenu = document.createElement('div');
+                qualityMenu.classList.add('plyr__quality-menu');
+
+                // Populate quality dropdown
+                availableQualities.forEach(quality => {
+                    const button = document.createElement('button');
+                    button.textContent = quality + 'p';
+                    button.onclick = () => {
+                        const levelIndex = hls.levels.findIndex(level => level.height === quality);
+                        hls.currentLevel = levelIndex;
+                        qualityButton.innerHTML = `Quality: ${quality}p`; // Update the button label
+                        qualityMenu.style.display = 'none'; // Hide the menu
                     };
+                    qualityMenu.appendChild(button);
                 });
 
-                // Plyr quality options setup
-                player.on('ready', () => {
-                    player.options.quality = {
-                        default: availableQualities[availableQualities.length - 1], // Default to highest quality
-                        options: availableQualities, // Available quality options
-                        forced: true, // Disable Plyr auto quality management
-                        onChange: (newQuality) => {
-                            const qualityIndex = hls.levels.findIndex(level => level.height === newQuality);
-                            hls.currentLevel = qualityIndex;
-                        }
-                    };
+                // Append the menu and button to the control bar
+                controlBar.appendChild(qualityButton);
+                controlBar.appendChild(qualityMenu);
+
+                // Show quality menu when the quality button is clicked
+                qualityButton.addEventListener('click', () => {
+                    qualityMenu.style.display = (qualityMenu.style.display === 'block') ? 'none' : 'block';
                 });
+
+                // Set default quality to highest
+                qualityButton.innerHTML = `Quality: ${availableQualities[availableQualities.length - 1]}p`;
             });
 
-            // Optional: log the current quality level when changed
+            // Log the quality change for debugging purposes
             hls.on(Hls.Events.LEVEL_SWITCHED, (event, data) => {
                 console.log('Switched to quality:', hls.levels[data.level].height + 'p');
             });
