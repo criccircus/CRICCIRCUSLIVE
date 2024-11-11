@@ -45,24 +45,54 @@
     <script src="https://cdn.plyr.io/3.6.8/plyr.polyfilled.js"></script>
 
     <script>
-        // Get the video URL from the query string
+        const video = document.getElementById('videoPlayer');
         const urlParams = new URLSearchParams(window.location.search);
         const videoUrl = urlParams.get('videoUrl');
-        
+
         // Initialize Plyr player
-        const video = document.getElementById('videoPlayer');
+        const player = new Plyr(video);
 
         if (Hls.isSupported() && videoUrl) {
             const hls = new Hls();
             hls.loadSource(videoUrl);
             hls.attachMedia(video);
-            hls.on(Hls.Events.MANIFEST_PARSED, () => {
-                new Plyr(video);
+
+            hls.on(Hls.Events.MANIFEST_PARSED, function () {
+                // Get available quality levels (resolutions)
+                const availableQualities = hls.levels.map(level => level.height).filter((v, i, a) => a.indexOf(v) === i); // Unique quality heights
+
+                // Set up the Plyr quality menu with these levels
+                player.options.quality = {
+                    default: availableQualities[availableQualities.length - 1], // Default to highest quality
+                    options: availableQualities, // Add all available quality levels
+                    forced: true, // Disable Plyr auto quality management
+                    onChange: (newQuality) => {
+                        // Find the HLS level that matches the selected quality and set it
+                        const levelIndex = hls.levels.findIndex(level => level.height === newQuality);
+                        hls.currentLevel = levelIndex;
+                    }
+                };
+
+                // Update the quality setting menu
+                player.on('ready', () => {
+                    player.quality = {
+                        options: availableQualities,
+                        forced: true,
+                        onChange: (newQuality) => {
+                            const qualityIndex = hls.levels.findIndex(level => level.height === newQuality);
+                            hls.currentLevel = qualityIndex;
+                        }
+                    };
+                });
+            });
+
+            // Optional: log the current quality level when changed
+            hls.on(Hls.Events.LEVEL_SWITCHED, (event, data) => {
+                console.log('Switched to quality:', hls.levels[data.level].height + 'p');
             });
         } else if (video.canPlayType('application/vnd.apple.mpegurl') && videoUrl) {
-            // For Safari and other browsers that support native HLS
             video.src = videoUrl;
-            new Plyr(video);
+            player.updateSettings();
         } else {
             alert('Your browser does not support HLS streams.');
         }
